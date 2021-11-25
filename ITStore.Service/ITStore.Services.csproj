@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ITStore.Domain\ITStore.Domain.csproj" />
+    <ProjectReference Include="..\ITStore.DTO\ITStore.DTOs.csproj" />
+    <ProjectReference Include="..\ITStore.Helper\ITStore.Helpers.csproj" />
+    <ProjectReference Include="..\ITStore.Persistance\ITStore.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -8,4 +8,9 @@
     <Folder Include="Inventories\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ITStore.Domain\ITStore.Domain.csproj" />
+    <ProjectReference Include="..\ITStore.Shared\ITStore.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

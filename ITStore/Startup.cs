@@ -25,6 +25,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using ITStore.Domain;
+using ITStore.Shared;
+using System.Security.Claims;
+using ITStore.Services.Interfaces;
 
 namespace backend
 {
@@ -48,7 +51,32 @@ namespace backend
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "IT Store Backend", Version = "v1" });
                 // using System.Reflection;
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                          new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            new string[] {}
+
+                    }
+                });
                 c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+                //c.EnableAnnotations();
             });
             services.AddApiVersioning(opts => { 
                 opts.ReportApiVersions = true;
@@ -62,6 +90,10 @@ namespace backend
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddAuthorization(opts =>
+            {
+                opts.AddPolicy("IsAdmin", policy => policy.RequireClaim(ClaimTypes.Role, "Admin") );
+            });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opts =>
                 {
@@ -71,7 +103,7 @@ namespace backend
                         ValidateAudience = false,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["jwtkey"])),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])),
                         ClockSkew = TimeSpan.Zero,
                     };
                 });
@@ -84,8 +116,13 @@ namespace backend
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
             services.AddDbContext<AppDbContext>();
+            
+            // Register Interface. It will mapped to service when it called in controller
             services.AddScoped<ICategoriesService, CategoriesService>();
             services.AddScoped<IProductsService, ProductsService>();
+            services.AddScoped<IWishlistsService, WishlistsService>();
+            services.AddScoped<ICartsService, CartsService>();
+            services.AddScoped<IOrdersService, OrdersService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

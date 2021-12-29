@@ -68,6 +68,18 @@ namespace ITStore.Shared
 
         public enum EnumPaymentStatuses
         {
+            [Display(Name = "Pending")]
+            Pending = 0,
+            [Display(Name = "Completed")]
+            Completed = 1,
+            [Display(Name = "Failed")]
+            Failed = 2,
+            [Display(Name = "Canceled")]
+            Canceled = 3
+        }
+
+        public enum EnumOrderStatuses
+        {
             [Display(Name = "Created")]
             Created = 0,
 

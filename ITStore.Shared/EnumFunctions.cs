@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 
-namespace ITStore.Helpers
+namespace ITStore.Shared
 {
     public static class EnumFunction
     {

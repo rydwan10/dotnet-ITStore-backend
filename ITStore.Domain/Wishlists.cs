@@ -8,6 +8,6 @@ namespace ITStore.Domain
         public Guid ProductsId { get; set; }
 
         public virtual ApplicationUsers Users { get; set; }
-        public virtual Products  Products { get; set; }
+        public virtual Products Products { get; set; }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using ITStore.DTOs.Categories;
 using ITStore.Helpers;
 using ITStore.Service.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -13,60 +16,79 @@ namespace ITStore.API.Controllers
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/categories")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoriesController : ControllerBase
     {
+        protected Guid UserId { get; set; }
 
         private readonly ICategoriesService _categoriesService;
 
-        public CategoriesController(ICategoriesService categoriesService)
+        public CategoriesController(ICategoriesService categoriesService, IHttpContextAccessor httpContextAccessor)
         {
             _categoriesService = categoriesService;
+            var claimsIdentity = httpContextAccessor.HttpContext.User;
+            UserId = new Guid(claimsIdentity.FindFirst("userId").Value);
         }
+        //[HttpGet("claims")]
+        //public object GetClaims()
+        //{
+        //    return User.Claims.Select(c => new { Type = c.Type, Value = c.Value });
+        //}
 
-        // GET: api/{version}/categories
+        // GET api/{version}/categories
         /// <summary>
         /// Get all categories data
         /// </summary>
-        /// <returns>list of all categories data</returns>
+        /// <returns>List of all categories data</returns>
+        /// <response code="200">[Ok] Successfully get all categories</response>
+        /// <response code="500">[Internal Server Error] Error when getting all categories</response>
         [HttpGet]
-        [ProducesResponseType(typeof(ResponseFormat), 200)]
-        public async Task<ResponseFormat> GetAll()
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> GetAll()
         {
             try
             {
                 var result = await _categoriesService.GetAllCategories();
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Successfully get all categories", result);
+                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Successfully get all categories", result));
             }
             catch (Exception e)
             {
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when getting all categories", e);
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when getting all categories", e));
             }
         }
 
-        // GET: api/{version}/categories/{id}
+        // GET api/{version}/categories/{id}
         /// <summary>
         /// Get Category by given id
         /// </summary>
         /// <param name="id">Category id with type UUID</param>
         /// <returns>Selected category by given id</returns>
+        /// <response code="200">[Ok] Successfully get category with id {id}</response>
+        /// <response code="404">[Not Found] Cannot find category with id {id}</response>
+        /// <response code="500">[Internal Server Error] Error when get category by id</response>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ResponseFormat), 200)]
-        public async Task<ResponseFormat> Get(Guid id)
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> Get(Guid id)
         {
             try
             {
                 var result = await _categoriesService.GetCategoryById(id);
                 if(result != null)
                 {
-                    return ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully get category with id {id}", result);
+                    return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully get category with id {id}", result));
                 } else
                 {
-                    return ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find category with id {id}", null);
+                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find category with id {id}", null));
                 }
             }
             catch (Exception e)
             {
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError,  "Error when get category by id", e);
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError,  "Error when get category by id", e));
             }
         }
 
@@ -76,22 +98,28 @@ namespace ITStore.API.Controllers
         /// </summary>
         /// <param name="data">New category data</param>
         /// <returns>Created category</returns>
+        /// <response code="200">[Ok] Successfully created new category</response>
+        /// <response code="400">[Bad Request] Payload for creating new category is invalid</response>
+        /// <response code="500">[Internal Server Error] Error when creating new category</response>
         [HttpPost]
-        [ProducesResponseType(typeof(ResponseFormat), 201)]
-        public async Task<ResponseFormat> Post([FromBody] CategoriesCreateDTO data)
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> Post([FromBody] CategoriesCreateDTO data)
         {
             try
             {
                 if(data == null)
                 {
-                    return ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, $"Payload for creating new category is invalid", null);
+                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, $"Payload for creating new category is invalid", null));
                 }
-                var result = await _categoriesService.CreateCategory(data);
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.Created, $"Successfully created new category", result);
+                var result = await _categoriesService.CreateCategory(data, UserId);
+                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully created new category", result));
             }
             catch (Exception e)
             {
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when creating new category", e);
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when creating new category", e));
             }
         }
 
@@ -102,22 +130,28 @@ namespace ITStore.API.Controllers
         /// <param name="id">Category id with type UUID</param>
         /// <param name="data">Updated category data</param>
         /// <returns>Updated category</returns>
+        /// <response code="200">[Ok] Successfully updated category with id {id}</response>
+        /// <response code="404">[Not Found] Cannot find category with id {id}</response>
+        /// <response code="500">[Internal Server Error] Error when updating category</response>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(ResponseFormat), 200)]
-        public async Task<ResponseFormat> Put(Guid id, [FromBody] CategoriesUpdateDTO data)
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> Put(Guid id, [FromBody] CategoriesUpdateDTO data)
         {
             try
             {
-                var  result = await _categoriesService.UpdateCategoryById(id, data);
+                var  result = await _categoriesService.UpdateCategoryById(id, data, UserId);
                 if(result == null)
                 {
-                    return ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find category with id {id}", null);
+                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find category with id {id}", null));
                 }
 
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully updated category with id {id}", result);
+                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully updated category with id {id}", result));
 
             } catch (Exception e) {
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when updating category", e);
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when updating category", e));
             }
         }
 
@@ -127,22 +161,28 @@ namespace ITStore.API.Controllers
         /// </summary>
         /// <param name="id">Category id with type UUID</param>
         /// <returns>Deleted category</returns>
+        /// <response code="200">[Ok] Successfully deleted category with id {id}</response>
+        /// <response code="404">[Not Found] Cannot find category with id {id}</response>
+        /// <response code="500">[Internal Server Error] Error when deleting category</response>
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(ResponseFormat), 200)]
-        public async Task<ResponseFormat> Delete(Guid id)
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> Delete(Guid id)
         {
             try
             {
-                var result = await _categoriesService.DeleteCategoryById(id);
+                var result = await _categoriesService.DeleteCategoryById(id, UserId);
                 if(result == null)
                 {
-                    return ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find category with id {id}", null);
+                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find category with id {id}", null));
                 }
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully deleted category with id {id}", result);
+                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully deleted category with id {id}", result));
             }
             catch (Exception e)
             {
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when deleting category", e);
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when deleting category", e));
             }
         }
     }

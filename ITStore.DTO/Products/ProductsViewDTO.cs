@@ -12,17 +12,20 @@ namespace ITStore.DTOs.Products
         public string Description { get; set; }
         public string SKU { get; set; }
         public decimal Price { get; set; }
-        public bool? IsInStock { get {
+        public bool? IsInStock
+        {
+            get
+            {
                 try
                 {
-                    return Inventories.Quantity > 0 ? true : false;
+                    return Inventories?.Quantity > 0 ? true : false;
                 }
                 catch (Exception)
                 {
 
                     return null;
-                }   
-         }
+                }
+            }
         }
         public CategoriesViewDTO Categories { get; set; }
         public InventoriesViewDTO Inventories { get; set; }

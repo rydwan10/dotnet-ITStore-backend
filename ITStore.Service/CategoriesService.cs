@@ -23,12 +23,11 @@ namespace ITStore.Services
             _mapper = mapper;
         }
 
-        public async Task<CategoriesViewDTO> CreateCategory(CategoriesCreateDTO data)
+        public async Task<CategoriesViewDTO> CreateCategory(CategoriesCreateDTO data, Guid userId)
         {
             var newCategory = _mapper.Map<Categories>(data);
 
-            newCategory.Id = Guid.NewGuid();
-            newCategory.CreatedBy(Guid.Empty);
+            newCategory.CreatedBy(userId);
 
             await _context.Categories.AddAsync(newCategory);
             await _context.SaveChangesAsync();
@@ -39,16 +38,16 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<CategoriesViewDTO> UpdateCategoryById(Guid id, CategoriesUpdateDTO data)
+        public async Task<CategoriesViewDTO> UpdateCategoryById(Guid id, CategoriesUpdateDTO data, Guid userId)
         {
 
             var selectedCategory = await _context.Categories.FindAsync(id);
             if (string.IsNullOrWhiteSpace(id.ToString()) || selectedCategory == null) return null;
 
-            var updatedCategory = _mapper.Map<Categories>(data);
 
-            updatedCategory.Id = id;
-            updatedCategory.ModifiedBy(Guid.Empty);
+            var updatedCategory = _mapper.Map(data, selectedCategory);
+            updatedCategory.ModifiedBy(userId);
+
 
             await _context.SaveChangesAsync();
 
@@ -56,13 +55,13 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<CategoriesViewDTO> DeleteCategoryById(Guid id)
+        public async Task<CategoriesViewDTO> DeleteCategoryById(Guid id, Guid userId)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(x => x.Id == id);
+            var category = await _context.Categories.FindAsync(id);
 
             if (category == null) return null;
 
-            category.DeletedBy(Guid.Empty);
+            category.DeletedBy(userId);
             await _context.SaveChangesAsync();
 
             var mappedResult = _mapper.Map<CategoriesViewDTO>(category);

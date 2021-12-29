@@ -23,12 +23,11 @@ namespace ITStore.Services
             _mapper = mapper;
         }
 
-        public async Task<ProductsViewDTO> CreateProduct(ProductsCreateDTO data)
+        public async Task<ProductsViewDTO> CreateProduct(ProductsCreateDTO data , Guid userId)
         {
             var newProduct = _mapper.Map<Products>(data);
 
-            newProduct.Id = Guid.NewGuid();
-            newProduct.CreatedBy(Guid.Empty);
+            newProduct.CreatedBy(userId);
 
             await _context.Products.AddAsync(newProduct);
             await _context.SaveChangesAsync();
@@ -37,16 +36,16 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<ProductsViewDTO> DeleteProductById(Guid id)
+        public async Task<ProductsViewDTO> DeleteProductById(Guid id, Guid userId)
         {
             var product = await _context.Products.Include(x => x.Inventories).Include(x => x.Discounts).Include(x => x.Categories).SingleOrDefaultAsync(x => x.Id == id);
             if (product == null) return null;
 
-            product.DeletedBy(Guid.Empty);
+            product.DeletedBy(userId);
 
             // Delete unused inventory data
             var productInventory = await _context.Inventories.SingleOrDefaultAsync(x => x.Id == product.InventoriesId);
-            productInventory.DeletedBy(Guid.Empty);
+            productInventory.DeletedBy(userId);
 
             await _context.SaveChangesAsync();
 
@@ -70,7 +69,7 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<ProductsViewDTO> UpdateProductById(Guid id, ProductsUpdateDTO data)
+        public async Task<ProductsViewDTO> UpdateProductById(Guid id, ProductsUpdateDTO data, Guid userId)
         {
             var selectedProduct = await _context.Products.FindAsync(id);
             if (string.IsNullOrWhiteSpace(id.ToString()) || selectedProduct == null) return null;
@@ -78,7 +77,7 @@ namespace ITStore.Services
             var updatedProduct = _mapper.Map(data, selectedProduct);
 
             updatedProduct.Id = id;
-            updatedProduct.ModifiedBy(Guid.Empty);
+            updatedProduct.ModifiedBy(userId);
 
             await _context.SaveChangesAsync();
 

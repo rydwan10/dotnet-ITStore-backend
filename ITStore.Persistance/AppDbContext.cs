@@ -47,6 +47,12 @@ namespace ITStore.Persistence
             modelBuilder.Entity<Inventories>().HasQueryFilter(x => x.StatusRecord != Constants.StatusRecordDelete);
             modelBuilder.Entity<Products>().HasQueryFilter(x => x.StatusRecord != Constants.StatusRecordDelete);
             modelBuilder.Entity<UserAddresses>().HasQueryFilter(x => x.StatusRecord != Constants.StatusRecordDelete);
+            modelBuilder.Entity<Carts>().HasQueryFilter(x => x.StatusRecord != Constants.StatusRecordDelete);
+            modelBuilder.Entity<Wishlists>().HasQueryFilter(x => x.StatusRecord != Constants.StatusRecordDelete);
+            modelBuilder.Entity<Orders>().HasQueryFilter(x => x.StatusRecord != Constants.StatusRecordDelete);
+            modelBuilder.Entity<OrderPayments>().HasQueryFilter(x => x.StatusRecord != Constants.StatusRecordDelete);
+            modelBuilder.Entity<OrderItems>().HasQueryFilter(x => x.StatusRecord != Constants.StatusRecordDelete);
+            modelBuilder.Entity<ShippingAddresses>().HasQueryFilter(x => x.StatusRecord != Constants.StatusRecordDelete);
 
             // Restrict Delete Related Data (Foreign Key)
             foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(x => x.GetForeignKeys()))

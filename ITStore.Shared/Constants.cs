@@ -8,4 +8,9 @@ namespace ITStore.Shared
         public const string StatusRecordUpdate = "U";
         public const string StatusRecordDelete = "D";
     }
+
+    public static class CustomClaimTypes
+    {
+        public const string Permission = "Permission";
+    }
 }

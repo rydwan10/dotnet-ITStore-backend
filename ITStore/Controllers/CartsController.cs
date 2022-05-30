@@ -44,11 +44,12 @@ namespace ITStore.API.Controllers
             try
             {
                 var result = await _cartsService.GetCarts(UserId);
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Successfully get products in cart", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully get products in cart", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when getting products in cart", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when getting products in cart", e));
             }
         }
 
@@ -63,7 +64,7 @@ namespace ITStore.API.Controllers
         /// <response code="500">[Internal Server Error] Error when creating carts item</response>
         [HttpPost]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status400BadRequest)] 
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Post([FromBody] CartsCreateDTO data)
         {
@@ -71,14 +72,16 @@ namespace ITStore.API.Controllers
             {
                 if(data == null)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, "Payload for creating new carts item is invalid"));
+                    return StatusCode(StatusCodes.Status400BadRequest,
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, "Payload for creating new carts item is invalid"));
                 }
                 var result = await _cartsService.AddToCarts(data, UserId);
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Successfully created new carts item", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully created new carts item", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when creating carts item", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when creating carts item", e));
             }
         }
 
@@ -102,13 +105,15 @@ namespace ITStore.API.Controllers
                 var result = await _cartsService.RemoveFromCarts(id, UserId);
                 if(result == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find carts item with id {id}", null));
+                    return StatusCode(StatusCodes.Status404NotFound,
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find carts item with id {id}", null));
                 }
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully deleted carts item with id {id}", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully deleted carts item with id {id}", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when deleting carts item", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                       ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when deleting carts item", e));
             }
         }
     }

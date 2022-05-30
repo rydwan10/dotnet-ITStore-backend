@@ -46,14 +46,16 @@ namespace ITStore.API.Controllers
             {
                 if (data == null)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, $"Payload for creating new order is invalid", null));
+                    return StatusCode(StatusCodes.Status400BadRequest,
+                           ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, $"Payload for creating new order is invalid", null));
                 }
                 var result = await _ordersService.CreateOrder(UserId, data);
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully created new order", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully created new order", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when creating new order", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when creating new order", e));
             }
         }
         // GET api/{version}/orders
@@ -71,11 +73,11 @@ namespace ITStore.API.Controllers
             try
             {
                 var result = await _ordersService.GetAllOrders(UserId);
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully get all orders", result);
+                return ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully get all orders", result);
             }
             catch (Exception e)
             {
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Error when getting all orders", e);
+                return ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Error when getting all orders", e);
             }
         }
     }

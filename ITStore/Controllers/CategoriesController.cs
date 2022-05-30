@@ -39,23 +39,24 @@ namespace ITStore.API.Controllers
         /// <summary>
         /// Get all categories data
         /// </summary>
-        /// <returns>List of all categories data</returns>
+        /// <returns>List of all categories data</returns>  
         /// <response code="200">[Ok] Successfully get all categories</response>
         /// <response code="500">[Internal Server Error] Error when getting all categories</response>
         [HttpGet]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status500InternalServerError)]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult> GetAll()
         {
             try
             {
                 var result = await _categoriesService.GetAllCategories();
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Successfully get all categories", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully get all categories", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when getting all categories", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when getting all categories", e));
             }
         }
 
@@ -67,12 +68,12 @@ namespace ITStore.API.Controllers
         /// <returns>Selected category by given id</returns>
         /// <response code="200">[Ok] Successfully get category with id {id}</response>
         /// <response code="404">[Not Found] Cannot find category with id {id}</response>
-        /// <response code="500">[Internal Server Error] Error when get category by id</response>
+        /// <response code="500">[Internal Server Error] Error when get category by id</response>   
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status500InternalServerError)]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<ActionResult> Get(Guid id)
         {
             try
@@ -80,15 +81,17 @@ namespace ITStore.API.Controllers
                 var result = await _categoriesService.GetCategoryById(id);
                 if(result != null)
                 {
-                    return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully get category with id {id}", result));
+                    return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully get category with id {id}", result));
                 } else
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find category with id {id}", null));
+                    return StatusCode(StatusCodes.Status404NotFound,
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find category with id {id}", null));
                 }
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError,  "Error when get category by id", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError,  "Error when get category by id", e));
             }
         }
 
@@ -112,14 +115,15 @@ namespace ITStore.API.Controllers
             {
                 if(data == null)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, $"Payload for creating new category is invalid", null));
+                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, $"Payload for creating new category is invalid", null));
                 }
                 var result = await _categoriesService.CreateCategory(data, UserId);
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully created new category", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully created new category", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when creating new category", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when creating new category", e));
             }
         }
 
@@ -145,13 +149,15 @@ namespace ITStore.API.Controllers
                 var  result = await _categoriesService.UpdateCategoryById(id, data, UserId);
                 if(result == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find category with id {id}", null));
+                    return StatusCode(StatusCodes.Status404NotFound,
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find category with id {id}", null));
                 }
 
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully updated category with id {id}", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully updated category with id {id}", result));
 
             } catch (Exception e) {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when updating category", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when updating category", e));
             }
         }
 
@@ -176,13 +182,15 @@ namespace ITStore.API.Controllers
                 var result = await _categoriesService.DeleteCategoryById(id, UserId);
                 if(result == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find category with id {id}", null));
+                    return StatusCode(StatusCodes.Status404NotFound,
+                           ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find category with id {id}", null));
                 }
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully deleted category with id {id}", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully deleted category with id {id}", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when deleting category", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                           ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when deleting category", e));
             }
         }
     }

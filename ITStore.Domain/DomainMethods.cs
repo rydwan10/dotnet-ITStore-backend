@@ -12,7 +12,7 @@ namespace ITStore.Domain
             baseProperties.CreatedBy = userId;
             baseProperties.CreatedAt = DateGMT7;
             baseProperties.StatusRecord = Constants.StatusRecordInsert;
-        }
+        }   
 
         public static void ModifiedBy(this BaseProperties baseProperties, Guid userId)
         {

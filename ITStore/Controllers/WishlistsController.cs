@@ -42,11 +42,11 @@ namespace ITStore.API.Controllers
             try
             {
                 var result = await _wishlistsService.GetWishlists(UserId);
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Successfully get wishlists", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully get wishlists", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when getting wishlists", e));
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when getting wishlists", e));
             }
         }
 
@@ -69,14 +69,14 @@ namespace ITStore.API.Controllers
             {
                 if(data == null)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, "Payload for creating new wishlist is invalid"));
+                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, "Payload for creating new wishlist is invalid"));
                 }
                 var result = await _wishlistsService.CreateWishlists(data, UserId);
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Successfully created new wishlist", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully created new wishlist", result));
             }
             catch (Exception e)
             {
-                return  StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when creating wishlist", e));
+                return  StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when creating wishlist", e));
             }
         }
 
@@ -100,13 +100,13 @@ namespace ITStore.API.Controllers
                 var result = await _wishlistsService.RemoveWishlists(id, UserId);
                 if(result == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find wishlist with id {id}", null));
+                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find wishlist with id {id}", null));
                 }
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully deleted wishlist with id {id}", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully deleted wishlist with id {id}", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when deleting wishlist", e));
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when deleting wishlist", e));
             }
         }
 

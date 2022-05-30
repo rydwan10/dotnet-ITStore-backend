@@ -44,11 +44,11 @@ namespace ITStore.API.Controllers
             try
             {
                 var result = await _productsService.GetAllProducts();
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Successfully get all products", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully get all products", result));
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when getting all products", e));
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when getting all products", e));
             }
         }
 
@@ -73,15 +73,17 @@ namespace ITStore.API.Controllers
                 var result = await _productsService.GetProductById(id);
                 if(result != null)
                 {
-                    return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully get product with id {id}", result));
+                    return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully get product with id {id}", result));
                 } else
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find product with id {id}", null));
+                    return StatusCode(StatusCodes.Status404NotFound,
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find product with id {id}", null));
                 }
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when get product by id", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when get product by id", e));
             }
         }
 
@@ -105,15 +107,15 @@ namespace ITStore.API.Controllers
             {
                 if (data == null)
                 {
-                    return ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, $"Payload for creating new product is invalid", null);
+                    return ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, $"Payload for creating new product is invalid", null);
                 }
                 var result = await _productsService.CreateProduct(data, UserId);
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.Created, $"Successfully created new product", result);
+                return ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully created new product", result);
             }
             catch (Exception e)
             {
 
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when creating new product", e);
+                return ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when creating new product", e);
             }
             
         }
@@ -140,15 +142,17 @@ namespace ITStore.API.Controllers
                 var result = await _productsService.UpdateProductById(id, data, UserId);
                 if (result == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find product with id {id}", null));
+                    return StatusCode(StatusCodes.Status404NotFound,
+                                     ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find product with id {id}", null));
                 }
 
-                return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully update product with id {id}", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully update product with id {id}", result));
 
             }
             catch (Exception e)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when updating product", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when updating product", e));
             }
         }
 
@@ -171,13 +175,13 @@ namespace ITStore.API.Controllers
                 var result = await _productsService.DeleteProductById(id, UserId);
                 if (result == null)
                 {
-                    return ResponseFormatter.FormatResponse(EnumStatusCodes.NotFound, $"Cannot find product with id {id}", null);
+                    return ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find product with id {id}", null);
                 }
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, $"Successfully deleted product with id {id}", result);
+                return ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully deleted product with id {id}", result);
             }
             catch (Exception e)
             {
-                return ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when deleting product", e);
+                return ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when deleting product", e);
             }
         }
     }

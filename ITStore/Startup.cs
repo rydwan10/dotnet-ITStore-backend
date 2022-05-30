@@ -123,6 +123,7 @@ namespace backend
             services.AddScoped<IWishlistsService, WishlistsService>();
             services.AddScoped<ICartsService, CartsService>();
             services.AddScoped<IOrdersService, OrdersService>();
+            services.AddScoped<IDataInitializerService, DataInitializerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

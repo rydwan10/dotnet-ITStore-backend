@@ -16,6 +16,7 @@ using static ITStore.Shared.Enums;
 using ITStore.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace ITStore.API.Controllers
 {
@@ -70,15 +71,20 @@ namespace ITStore.API.Controllers
                 if(result.Succeeded)
                 {
                     var createdToken = await BuildToken(userCredentials);
-                    return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "Successfully login", createdToken));
+                    ReasonPhrases.GetReasonPhrase(StatusCodes.Status102Processing);
+                    return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully login", createdToken));
                 } else
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, "Invalid credentials", null)); 
+                    return StatusCode(StatusCodes.Status400BadRequest,
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest,
+                                      "Invalid credentials", null)); 
                 }
             }
             catch (Exception e) { 
             
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when login with user credentials", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError,
+                                  "Error when login with user credentials", e));
             }
         }
 
@@ -103,7 +109,9 @@ namespace ITStore.API.Controllers
 
                 if(findUser != null)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, "Email already taken", null));
+                    return StatusCode(StatusCodes.Status400BadRequest,
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest,
+                                      "Email already taken", null));
                 }
 
                 var newUser = new ApplicationUsers
@@ -124,20 +132,22 @@ namespace ITStore.API.Controllers
                     Email = userRegistersDTO.Email,
                     Password = userRegistersDTO.Password,
                 };
-
+                
                 if(result.Succeeded)
                 {
                     var createdToken = await BuildToken(credentials);
-                    return Ok(ResponseFormatter.FormatResponse(EnumStatusCodes.Ok, "User successfully registered", createdToken));
+                    return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "User successfully registered", createdToken));
                 } else
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(EnumStatusCodes.BadRequest, "User failed to register", null));
+                    return StatusCode(StatusCodes.Status400BadRequest,
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, "User failed to register", null));
                 }
             }
             catch (Exception e)
             {
 
-                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(EnumStatusCodes.InternalServerError, "Error when registering user", e));
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                                  ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError, "Error when registering user", e));
             }
         }
 

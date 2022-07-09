@@ -3,7 +3,7 @@ using System;
 
 namespace ITStore.Domain
 {
-    public class ApplicationUsers : IdentityUser
+    public class ApplicationUsers : IdentityUser<Guid>
     {
         public string FirstName { get; set; }
         public string? LastName { get; set; }

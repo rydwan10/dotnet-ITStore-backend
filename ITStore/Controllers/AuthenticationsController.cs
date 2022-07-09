@@ -28,7 +28,7 @@ namespace ITStore.API.Controllers
     {
         private readonly UserManager<ApplicationUsers> _userManager;
         private readonly SignInManager<ApplicationUsers> _signInManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
@@ -37,7 +37,7 @@ namespace ITStore.API.Controllers
             AppDbContext context, 
             UserManager<ApplicationUsers> userManager, 
             SignInManager<ApplicationUsers> signInManager,
-            RoleManager<IdentityRole> roleManager,
+            RoleManager<IdentityRole<Guid>> roleManager,
             IConfiguration configuration,
             IMapper mapper
         )
@@ -124,7 +124,7 @@ namespace ITStore.API.Controllers
                 };
 
                 var result = await _userManager.CreateAsync(newUser, userRegistersDTO.Password);
-                await _userManager.AddToRoleAsync(newUser, "User");
+                await _userManager.AddToRoleAsync(newUser, "USER");
 
 
                 var credentials = new UserCredentialsDTO
@@ -159,7 +159,7 @@ namespace ITStore.API.Controllers
             var claims = new List<Claim>()
             {
                 new Claim("email", userCredentials.Email),
-                new Claim("userId", user.Id)
+                new Claim("userId", user.Id.ToString())
             };
 
             if(roles != null)

@@ -8,26 +8,27 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using System;
-using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace ITStore.Services
 {
-    public class CategoriesService : ICategoriesService
+    public class CategoriesService : BaseService, ICategoriesService
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
 
-        public CategoriesService(AppDbContext context, IMapper mapper)
+        public CategoriesService(AppDbContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _context = context;
             _mapper = mapper;
         }
 
-        public async Task<CategoriesViewDTO> CreateCategory(CategoriesCreateDTO data, Guid userId)
+        public async Task<CategoriesViewDTO> CreateCategory(CategoriesCreateDTO data)
         {
             var newCategory = _mapper.Map<Categories>(data);
-
-            newCategory.CreatedBy(userId);
+            
+            
+            newCategory.CreatedBy(UserId);
 
             await _context.Categories.AddAsync(newCategory);
             await _context.SaveChangesAsync();
@@ -38,7 +39,7 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<CategoriesViewDTO> UpdateCategoryById(Guid id, CategoriesUpdateDTO data, Guid userId)
+        public async Task<CategoriesViewDTO> UpdateCategoryById(Guid id, CategoriesUpdateDTO data)
         {
 
             var selectedCategory = await _context.Categories.FindAsync(id);
@@ -46,7 +47,7 @@ namespace ITStore.Services
 
 
             var updatedCategory = _mapper.Map(data, selectedCategory);
-            updatedCategory.ModifiedBy(userId);
+            updatedCategory.ModifiedBy(UserId);
 
 
             await _context.SaveChangesAsync();
@@ -55,13 +56,13 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<CategoriesViewDTO> DeleteCategoryById(Guid id, Guid userId)
+        public async Task<CategoriesViewDTO> DeleteCategoryById(Guid id)
         {
             var category = await _context.Categories.FindAsync(id);
 
             if (category == null) return null;
 
-            category.DeletedBy(userId);
+            category.DeletedBy(UserId);
             await _context.SaveChangesAsync();
 
             var mappedResult = _mapper.Map<CategoriesViewDTO>(category);

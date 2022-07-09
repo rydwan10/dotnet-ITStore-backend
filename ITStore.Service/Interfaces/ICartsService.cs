@@ -9,8 +9,8 @@ namespace ITStore.Services.Interfaces
 {
     public interface ICartsService
     {
-        Task<List<CartsViewDTO>> GetCarts(Guid userId);
-        Task<CartsViewDTO> AddToCarts(CartsCreateDTO data, Guid userId);
-        Task<CartsViewDTO> RemoveFromCarts(Guid id, Guid userId);
+        Task<List<CartsViewDTO>> GetCarts();
+        Task<CartsViewDTO> AddToCarts(CartsCreateDTO data);
+        Task<CartsViewDTO> RemoveFromCarts(Guid id);
     }
 }

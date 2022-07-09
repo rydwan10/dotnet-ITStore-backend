@@ -10,8 +10,8 @@ namespace ITStore.Services.Interfaces
 {
     public interface IOrdersService
     {
-        Task<TransactionsViewDTO> CreateOrder(Guid userId, TransactionsCreateDTO data);
-        Task<List<TransactionsViewDTO>> GetAllOrders(Guid userId);
-        Task<TransactionsViewDTO> GetOrdersById(Guid userId, Guid id);
+        Task<TransactionsViewDTO> CreateOrder(TransactionsCreateDTO data);
+        Task<List<TransactionsViewDTO>> GetAllOrders();
+        Task<TransactionsViewDTO> GetOrdersById(Guid id);
     }
 }

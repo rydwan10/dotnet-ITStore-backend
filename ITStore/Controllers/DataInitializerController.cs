@@ -23,13 +23,12 @@ namespace ITStore.API.Controllers
         }
 
         [HttpPost]
-
         public async Task <ActionResult<string>> Initialize()
         {
             try
             {
                 var result = await _dataInitializerService.Initialize();
-                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Data sucessfully initialized", result));
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Data successfully initialized", result));
             }
             catch (Exception e)
             {

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ITStore.Domain;
 using ITStore.Persistence;
 using ITStore.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ITStore.Services
@@ -12,27 +13,79 @@ namespace ITStore.Services
 	public class DataInitializerService : IDataInitializerService
 	{
         private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUsers> _userManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-        private static Guid PhoneCategoryId = new Guid("ee5c44db-558d-4ae9-aeff-ee311a34f98f");
-        private static Guid LaptopCategoryId = new Guid("1eb4efe1-6c66-46a5-b422-12b473e83374");
-        private static Guid AccessoriesCategoryId = new Guid("925072de-f3fe-486c-a3c9-d4618a15cb1d");
+        private readonly Guid _phoneCategoryId = new Guid("ee5c44db-558d-4ae9-aeff-ee311a34f98f");
+        private readonly Guid _laptopCategoryId = new Guid("1eb4efe1-6c66-46a5-b422-12b473e83374");
+        private readonly Guid _accessoriesCategoryId = new Guid("925072de-f3fe-486c-a3c9-d4618a15cb1d");
+        private readonly Guid _discountId = new Guid("0915553c-435a-45b9-b611-5299c62eafef");
 
-        private static Guid DiscountId = new Guid("0915553c-435a-45b9-b611-5299c62eafef");
-
-        public DataInitializerService(AppDbContext context)
+        public DataInitializerService(AppDbContext context, UserManager<ApplicationUsers> userManager, RoleManager<IdentityRole<Guid>> roleManager)
 		{
             _context = context;
-		}
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
 
         public async Task<string> Initialize()
         {
-            try
-            {
+            await InitializeRoles();
+            await InitializeAdmin();
+            await InitializeUsers();
+            await InitializeDiscounts();
+            await InitializeCategories();
+            await InitializeProducts();
 
+            return "Initialized";
+        }
+
+        private async Task InitializeRoles()
+        {
+            var isRoleAdminExist = await _roleManager.RoleExistsAsync("ADMIN");
+            if (!isRoleAdminExist)
+            {
+                await _roleManager.CreateAsync(new IdentityRole<Guid>("ADMIN"));
             }
-            catch (Exception ex)
-            {
 
+            var isRoleUserExist = await _roleManager.RoleExistsAsync("USER");
+            if (!isRoleUserExist)
+            {
+                await _roleManager.CreateAsync(new IdentityRole<Guid>("USER"));
+            }
+        }
+
+        private async Task InitializeAdmin()
+        {
+            var listUser = new List<ApplicationUsers>()
+            {
+                new ApplicationUsers
+                {
+                    UserName = "rydwan.dev@gmail.com",
+                    Email = "rydwan.dev@gmail.com",
+                    PhoneNumber = "082117055066",
+                    FirstName = "Muhammad",
+                    LastName = "Rydwan",
+                },
+                new ApplicationUsers
+                {
+                    UserName = "admin@itstore.com",
+                    Email = "admin@itstore.com",
+                    PhoneNumber = "085111222333",
+                    FirstName = "Admin",
+                    LastName = "",
+                },
+            };
+
+           
+            foreach (var newUser in listUser)
+            {
+                var isEmailTaken = await _userManager.FindByEmailAsync(newUser.Email);
+                if (isEmailTaken == null)
+                {
+                    await _userManager.CreateAsync(newUser, "admin12345");
+                    await _userManager.AddToRoleAsync(newUser, "ADMIN");
+                }
             }
         }
 
@@ -41,9 +94,9 @@ namespace ITStore.Services
             var checkDiscounts = await _context.Discounts.ToListAsync();
             if(!checkDiscounts.Any())
             {
-                Discounts discount = new Discounts()
+                var discount = new Discounts()
                 {
-                    Id = DiscountId,
+                    Id = _discountId,
                     Description = "20% off Discount",
                     DiscountPercent = 20M,
                     IsActive = true,
@@ -67,19 +120,19 @@ namespace ITStore.Services
                 {
                     new Categories
                     {
-                        Id = PhoneCategoryId,
+                        Id = _phoneCategoryId,
                         Name = "Phone",
                         Description = "Phone Category"
                     },
                     new Categories
                     {
-                        Id = LaptopCategoryId,
+                        Id = _laptopCategoryId,
                         Name = "Laptop",
                         Description = "Laptop Category"
                     },
                     new Categories
                     {
-                        Id = AccessoriesCategoryId,
+                        Id = _accessoriesCategoryId,
                         Name = "Accessories",
                         Description = "Accessories Category"
                     }
@@ -108,8 +161,8 @@ namespace ITStore.Services
                         Name = "iPhone 12 Pro",
                         Description = "iPhone 12 Pro",
                         SKU = "APPL/IP/12",
-                        CategoriesId = PhoneCategoryId,
-                        DiscountsId = DiscountId,
+                        CategoriesId = _phoneCategoryId,
+                        DiscountsId = _discountId,
                     },
                     new Products
                     {
@@ -117,7 +170,7 @@ namespace ITStore.Services
                         Name = "MacBook Pro 14",
                         Description = "MacBook Pro 14",
                         SKU = "APPL/MAC/14",
-                        CategoriesId = LaptopCategoryId,
+                        CategoriesId = _laptopCategoryId,
                         DiscountsId = null,
                     },
                     new Products
@@ -126,7 +179,7 @@ namespace ITStore.Services
                         Name = "Xiaomi 12",
                         Description = "Xiaomi 12",
                         SKU = "MI/XIA/12",
-                        CategoriesId = PhoneCategoryId,
+                        CategoriesId = _phoneCategoryId,
                         DiscountsId = null,
                     },
                     new Products
@@ -135,7 +188,7 @@ namespace ITStore.Services
                         Name = "Asus TUF zlk129",
                         Description = "Asus Tuf zlk129",
                         SKU = "ASUS/TUF/zlik129",
-                        CategoriesId = LaptopCategoryId,
+                        CategoriesId = _laptopCategoryId,
                         DiscountsId = null,
                     },
                     new Products
@@ -144,7 +197,7 @@ namespace ITStore.Services
                         Name = "POCO X3 Pro",
                         Description = "POCO X3 Pro",
                         SKU = "POCO/X3/Pro",
-                        CategoriesId = PhoneCategoryId,
+                        CategoriesId = _phoneCategoryId,
                         DiscountsId = null
                     }
                 };
@@ -166,11 +219,42 @@ namespace ITStore.Services
 
                 await _context.Inventories.AddRangeAsync(inventories);
                 await _context.Products.AddRangeAsync(products);
+
+                await _context.SaveChangesAsync();
             }
         }
         private async Task InitializeUsers()
         {
-            var checkUser = await _context.
+           var listUser = new List<ApplicationUsers>()
+            {
+                new ApplicationUsers
+                {
+                    UserName = "user1@itstore.com",
+                    Email = "user1@itstore.com",
+                    PhoneNumber = "085111222333",
+                    FirstName = "User 1",
+                    LastName = "",
+                },
+                new ApplicationUsers
+                {
+                    UserName = "user2@itstore.com",
+                    Email = "user2@itstore.com",
+                    PhoneNumber = "085111222333",
+                    FirstName = "User 2",
+                    LastName = "",
+                },
+            };
+
+           
+           foreach (var newUser in listUser)
+           {
+               var isEmailTaken = await _userManager.FindByEmailAsync(newUser.Email);
+               if (isEmailTaken == null)
+               {
+                   await _userManager.CreateAsync(newUser, "admin12345");
+                   await _userManager.AddToRoleAsync(newUser, "USER");
+               }
+           }
         }
     }
 }

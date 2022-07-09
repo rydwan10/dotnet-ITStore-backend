@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ITStore.Persistence
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUsers>
+    public class AppDbContext : IdentityDbContext<ApplicationUsers, IdentityRole<Guid>, Guid>
     {
         public virtual DbSet<Categories> Categories { get; set; }
         public virtual DbSet<Discounts> Discounts { get; set; } 
@@ -35,7 +35,7 @@ namespace ITStore.Persistence
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=localhost; Database=ITStoreDev; Username=postgres; Password=admin");
+            optionsBuilder.UseNpgsql("Host=localhost; Database=ITStoreDev2; Username=postgres; Password=admin");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

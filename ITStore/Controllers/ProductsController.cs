@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using static ITStore.Shared.Enums;
 
 namespace ITStore.API.Controllers
 {
@@ -21,11 +20,9 @@ namespace ITStore.API.Controllers
 
         private readonly IProductsService _productsService;
 
-        public ProductsController(IProductsService productsService, IHttpContextAccessor httpContextAccessor)
+        public ProductsController(IProductsService productsService)
         {
             _productsService = productsService;
-            var claimsIdentity = httpContextAccessor.HttpContext.User;
-            UserId = new Guid(claimsIdentity.FindFirst("userId").Value);
         }
 
         // GET api/{version}/products
@@ -60,7 +57,7 @@ namespace ITStore.API.Controllers
         /// <returns>Selected product by given id</returns>
         /// <response code="200">[Ok] Successfully get product with id {id}</response>
         /// <response code="404">[Not Found] Cannot find product with id {id}</response>
-        /// <response code="500">[Internal Server Error] Error when get prouduct by id</response>
+        /// <response code="500">[Internal Server Error] Error when get product by id</response>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status404NotFound)]
@@ -77,7 +74,7 @@ namespace ITStore.API.Controllers
                 } else
                 {
                     return StatusCode(StatusCodes.Status404NotFound,
-                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find product with id {id}", null));
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find product with id {id}"));
                 }
             }
             catch (Exception e)
@@ -107,9 +104,9 @@ namespace ITStore.API.Controllers
             {
                 if (data == null)
                 {
-                    return ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, $"Payload for creating new product is invalid", null);
+                    return ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, $"Payload for creating new product is invalid");
                 }
-                var result = await _productsService.CreateProduct(data, UserId);
+                var result = await _productsService.CreateProduct(data);
                 return ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully created new product", result);
             }
             catch (Exception e)
@@ -139,11 +136,11 @@ namespace ITStore.API.Controllers
         {
             try
             {
-                var result = await _productsService.UpdateProductById(id, data, UserId);
+                var result = await _productsService.UpdateProductById(id, data);
                 if (result == null)
                 {
                     return StatusCode(StatusCodes.Status404NotFound,
-                                     ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find product with id {id}", null));
+                                     ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find product with id {id}"));
                 }
 
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully update product with id {id}", result));
@@ -172,10 +169,10 @@ namespace ITStore.API.Controllers
         {
             try
             {
-                var result = await _productsService.DeleteProductById(id, UserId);
+                var result = await _productsService.DeleteProductById(id);
                 if (result == null)
                 {
-                    return ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find product with id {id}", null);
+                    return ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find product with id {id}");
                 }
                 return ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully deleted product with id {id}", result);
             }

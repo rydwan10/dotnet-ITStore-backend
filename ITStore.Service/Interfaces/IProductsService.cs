@@ -9,9 +9,9 @@ namespace ITStore.Service.Interfaces
     public interface IProductsService
     {
         Task<List<ProductsViewDTO>> GetAllProducts();
-        Task<ProductsViewDTO> CreateProduct(ProductsCreateDTO data, Guid userId);
+        Task<ProductsViewDTO> CreateProduct(ProductsCreateDTO data);
         Task<ProductsViewDTO> GetProductById(Guid id);
-        Task<ProductsViewDTO> DeleteProductById(Guid id, Guid userId);
-        Task<ProductsViewDTO> UpdateProductById(Guid id, ProductsUpdateDTO data, Guid userId);
+        Task<ProductsViewDTO> DeleteProductById(Guid id);
+        Task<ProductsViewDTO> UpdateProductById(Guid id, ProductsUpdateDTO data);
     }
 }

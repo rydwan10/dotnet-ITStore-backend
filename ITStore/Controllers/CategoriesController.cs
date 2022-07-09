@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using static ITStore.Shared.Enums;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,11 +22,9 @@ namespace ITStore.API.Controllers
 
         private readonly ICategoriesService _categoriesService;
 
-        public CategoriesController(ICategoriesService categoriesService, IHttpContextAccessor httpContextAccessor)
+        public CategoriesController(ICategoriesService categoriesService)
         {
             _categoriesService = categoriesService;
-            var claimsIdentity = httpContextAccessor.HttpContext.User;
-            UserId = new Guid(claimsIdentity.FindFirst("userId").Value);
         }
         //[HttpGet("claims")]
         //public object GetClaims()
@@ -85,7 +82,7 @@ namespace ITStore.API.Controllers
                 } else
                 {
                     return StatusCode(StatusCodes.Status404NotFound,
-                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find category with id {id}", null));
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find category with id {id}"));
                 }
             }
             catch (Exception e)
@@ -115,9 +112,9 @@ namespace ITStore.API.Controllers
             {
                 if(data == null)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, $"Payload for creating new category is invalid", null));
+                    return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, $"Payload for creating new category is invalid"));
                 }
-                var result = await _categoriesService.CreateCategory(data, UserId);
+                var result = await _categoriesService.CreateCategory(data);
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully created new category", result));
             }
             catch (Exception e)
@@ -146,11 +143,11 @@ namespace ITStore.API.Controllers
         {
             try
             {
-                var  result = await _categoriesService.UpdateCategoryById(id, data, UserId);
+                var  result = await _categoriesService.UpdateCategoryById(id, data);
                 if(result == null)
                 {
                     return StatusCode(StatusCodes.Status404NotFound,
-                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find category with id {id}", null));
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find category with id {id}"));
                 }
 
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully updated category with id {id}", result));
@@ -179,11 +176,11 @@ namespace ITStore.API.Controllers
         {
             try
             {
-                var result = await _categoriesService.DeleteCategoryById(id, UserId);
+                var result = await _categoriesService.DeleteCategoryById(id);
                 if(result == null)
                 {
                     return StatusCode(StatusCodes.Status404NotFound,
-                           ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find category with id {id}", null));
+                           ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find category with id {id}"));
                 }
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully deleted category with id {id}", result));
             }

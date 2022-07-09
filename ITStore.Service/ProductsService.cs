@@ -1,33 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using ITStore.Domain;
 using ITStore.DTOs.Products;
 using ITStore.Persistence;
 using ITStore.Service.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace ITStore.Services
 {
-    public class ProductsService : IProductsService
+    public class ProductsService : BaseService, IProductsService
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
 
-        public ProductsService(AppDbContext context, IMapper mapper)
+        public ProductsService(AppDbContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor) 
         {
             _context = context;
             _mapper = mapper;
         }
 
-        public async Task<ProductsViewDTO> CreateProduct(ProductsCreateDTO data , Guid userId)
+        public async Task<ProductsViewDTO> CreateProduct(ProductsCreateDTO data)
         {
             var newProduct = _mapper.Map<Products>(data);
 
-            newProduct.CreatedBy(userId);
+            newProduct.CreatedBy( UserId);
 
             await _context.Products.AddAsync(newProduct);
             await _context.SaveChangesAsync();
@@ -36,16 +35,16 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<ProductsViewDTO> DeleteProductById(Guid id, Guid userId)
+        public async Task<ProductsViewDTO> DeleteProductById(Guid id)
         {
             var product = await _context.Products.Include(x => x.Inventories).Include(x => x.Discounts).Include(x => x.Categories).SingleOrDefaultAsync(x => x.Id == id);
             if (product == null) return null;
 
-            product.DeletedBy(userId);
+            product.DeletedBy( UserId);
 
             // Delete unused inventory data
             var productInventory = await _context.Inventories.SingleOrDefaultAsync(x => x.Id == product.InventoriesId);
-            productInventory.DeletedBy(userId);
+            productInventory.DeletedBy( UserId);
 
             await _context.SaveChangesAsync();
 
@@ -69,7 +68,7 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<ProductsViewDTO> UpdateProductById(Guid id, ProductsUpdateDTO data, Guid userId)
+        public async Task<ProductsViewDTO> UpdateProductById(Guid id, ProductsUpdateDTO data)
         {
             var selectedProduct = await _context.Products.FindAsync(id);
             if (string.IsNullOrWhiteSpace(id.ToString()) || selectedProduct == null) return null;
@@ -77,7 +76,7 @@ namespace ITStore.Services
             var updatedProduct = _mapper.Map(data, selectedProduct);
 
             updatedProduct.Id = id;
-            updatedProduct.ModifiedBy(userId);
+            updatedProduct.ModifiedBy(UserId);
 
             await _context.SaveChangesAsync();
 

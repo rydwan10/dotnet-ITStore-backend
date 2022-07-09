@@ -9,8 +9,8 @@ namespace ITStore.Services.Interfaces
 {
     public interface IWishlistsService
     {
-        Task<List<WishlistsViewDTO>> GetWishlists(Guid userId);
-        Task<WishlistsViewDTO> CreateWishlists(WishlistsCreateDTO data, Guid userId);
-        Task<WishlistsViewDTO> RemoveWishlists(Guid id, Guid userId);
+        Task<List<WishlistsViewDTO>> GetWishlists();
+        Task<WishlistsViewDTO> CreateWishlists(WishlistsCreateDTO data);
+        Task<WishlistsViewDTO> RemoveWishlists(Guid id);
     }
 }

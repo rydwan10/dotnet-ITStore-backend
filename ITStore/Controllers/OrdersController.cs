@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using static ITStore.Shared.Enums;
 
 namespace ITStore.API.Controllers
 {
@@ -17,14 +16,11 @@ namespace ITStore.API.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class OrdersController : ControllerBase
     {
-        protected Guid UserId { get; set; }
         private readonly IOrdersService _ordersService;
 
-        public OrdersController(IOrdersService ordersService, IHttpContextAccessor httpContextAccessor)
+        public OrdersController(IOrdersService ordersService)
         {
             _ordersService = ordersService;
-            var claimsIdentity = httpContextAccessor.HttpContext.User;
-            UserId = new Guid(claimsIdentity.FindFirst("userId").Value);
         }
 
         // POST api/{version}/orders
@@ -47,9 +43,9 @@ namespace ITStore.API.Controllers
                 if (data == null)
                 {
                     return StatusCode(StatusCodes.Status400BadRequest,
-                           ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, $"Payload for creating new order is invalid", null));
+                           ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, $"Payload for creating new order is invalid"));
                 }
-                var result = await _ordersService.CreateOrder(UserId, data);
+                var result = await _ordersService.CreateOrder(data);
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully created new order", result));
             }
             catch (Exception e)
@@ -72,7 +68,7 @@ namespace ITStore.API.Controllers
         {
             try
             {
-                var result = await _ordersService.GetAllOrders(UserId);
+                var result = await _ordersService.GetAllOrders();
                 return ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully get all orders", result);
             }
             catch (Exception e)

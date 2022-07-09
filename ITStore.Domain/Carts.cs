@@ -4,7 +4,7 @@ namespace ITStore.Domain
 {
     public class Carts : BaseProperties
     {
-        public string UsersId { get; set; }
+        public Guid UsersId { get; set; }
         public Guid ProductsId { get; set; }
         public int Quantity { get; set; }
 

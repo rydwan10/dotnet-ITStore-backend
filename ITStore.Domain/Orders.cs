@@ -5,7 +5,7 @@ namespace ITStore.Domain
 {
     public class Orders : BaseProperties
     {
-        public string UsersId { get; set; }
+        public Guid UsersId { get; set; }
         public decimal Total { get; set; }
         public Guid OrderPaymentsId { get; set; }
         public EnumOrderStatuses Status { get; set; }

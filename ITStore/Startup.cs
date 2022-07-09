@@ -28,6 +28,8 @@ using ITStore.Domain;
 using ITStore.Shared;
 using System.Security.Claims;
 using ITStore.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace backend
 {
@@ -82,7 +84,7 @@ namespace backend
                 opts.ReportApiVersions = true;
             });
 
-            services.AddIdentity<ApplicationUsers, IdentityRole>(opts => {
+            services.AddIdentity<ApplicationUsers, IdentityRole<Guid>>(opts => {
                 opts.Password.RequireUppercase = false;
                 opts.Password.RequireDigit = false;
                 opts.Password.RequireNonAlphanumeric = false;
@@ -113,10 +115,10 @@ namespace backend
                 mc.AddProfile(new AutoMapperProfiles());
             });
 
-            IMapper mapper = mapperConfig.CreateMapper();
+            var mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
             services.AddDbContext<AppDbContext>();
-            
+            services.TryAddScoped<IHttpContextAccessor, HttpContextAccessor>();
             // Register Interface. It will mapped to service when it called in controller
             services.AddScoped<ICategoriesService, CategoriesService>();
             services.AddScoped<IProductsService, ProductsService>();
@@ -124,6 +126,7 @@ namespace backend
             services.AddScoped<ICartsService, CartsService>();
             services.AddScoped<IOrdersService, OrdersService>();
             services.AddScoped<IDataInitializerService, DataInitializerService>();
+            //services.AddScoped<IDataInitializerService, DataInitializerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

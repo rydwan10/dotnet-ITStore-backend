@@ -6,10 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using static ITStore.Shared.Enums;
+
 
 namespace ITStore.API.Controllers
 {
@@ -19,14 +17,11 @@ namespace ITStore.API.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CartsController : ControllerBase
     {
-        protected Guid UserId { get; set; }
-        public readonly ICartsService _cartsService;
+        private readonly ICartsService _cartsService;
 
-        public CartsController(ICartsService cartsService, IHttpContextAccessor httpContextAccessor)
+        public CartsController(ICartsService cartsService)
         {
             _cartsService = cartsService;
-            var claimsIdentity = httpContextAccessor.HttpContext.User;
-            UserId = new Guid(claimsIdentity.FindFirst("userId").Value);
         }
 
         // GET api/{version}/carts
@@ -43,7 +38,7 @@ namespace ITStore.API.Controllers
         {
             try
             {
-                var result = await _cartsService.GetCarts(UserId);
+                var result = await _cartsService.GetCarts();
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully get products in cart", result));
             }
             catch (Exception e)
@@ -73,9 +68,10 @@ namespace ITStore.API.Controllers
                 if(data == null)
                 {
                     return StatusCode(StatusCodes.Status400BadRequest,
-                                      ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, "Payload for creating new carts item is invalid"));
+                                      ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, 
+                                          "Payload for creating new carts item is invalid"));
                 }
-                var result = await _cartsService.AddToCarts(data, UserId);
+                var result = await _cartsService.AddToCarts(data);
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully created new carts item", result));
             }
             catch (Exception e)
@@ -102,13 +98,14 @@ namespace ITStore.API.Controllers
         {
             try
             {
-                var result = await _cartsService.RemoveFromCarts(id, UserId);
+                var result = await _cartsService.RemoveFromCarts(id);
                 if(result == null)
                 {
                     return StatusCode(StatusCodes.Status404NotFound,
                                       ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find carts item with id {id}", null));
                 }
-                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully deleted carts item with id {id}", result));
+                return Ok(
+                    ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully deleted carts item with id {id}", result));
             }
             catch (Exception e)
             {

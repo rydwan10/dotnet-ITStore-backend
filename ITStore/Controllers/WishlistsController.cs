@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using static ITStore.Shared.Enums;
 
 namespace ITStore.API.Controllers
 {
@@ -17,14 +16,11 @@ namespace ITStore.API.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class WishlistsController : ControllerBase
     {
-        protected Guid UserId { get; set; }
         private readonly IWishlistsService _wishlistsService;
 
-        public WishlistsController(IWishlistsService wishlistsService, IHttpContextAccessor httpContextAccessor)
+        public WishlistsController(IWishlistsService wishlistsService)
         {
             _wishlistsService = wishlistsService;
-            var claimsIdentity = httpContextAccessor.HttpContext.User;
-            UserId = new Guid(claimsIdentity.FindFirst("userId").Value);
         }
 
         // GET api/{version}/wishlists
@@ -41,7 +37,7 @@ namespace ITStore.API.Controllers
         {
             try
             {
-                var result = await _wishlistsService.GetWishlists(UserId);
+                var result = await _wishlistsService.GetWishlists();
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully get wishlists", result));
             }
             catch (Exception e)
@@ -56,7 +52,7 @@ namespace ITStore.API.Controllers
         /// </summary>
         /// <param name="data">New wishlist data</param>
         /// <returns>Created wishlist</returns>
-        /// <response code="200">[Ok] Successfully created new wishlit</response>
+        /// <response code="200">[Ok] Successfully created new wishlist</response>
         /// <response code="400">[Bad Request] Payload for creating new wishlist is invalid</response>
         /// <response code="500">[Internal Server Error] Error when creating wishlist</response>
         [HttpPost]
@@ -71,7 +67,7 @@ namespace ITStore.API.Controllers
                 {
                     return StatusCode(StatusCodes.Status400BadRequest, ResponseFormatter.FormatResponse(StatusCodes.Status400BadRequest, "Payload for creating new wishlist is invalid"));
                 }
-                var result = await _wishlistsService.CreateWishlists(data, UserId);
+                var result = await _wishlistsService.CreateWishlists(data);
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Successfully created new wishlist", result));
             }
             catch (Exception e)
@@ -97,10 +93,10 @@ namespace ITStore.API.Controllers
         {
             try
             {
-                var result = await _wishlistsService.RemoveWishlists(id, UserId);
+                var result = await _wishlistsService.RemoveWishlists(id);
                 if(result == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find wishlist with id {id}", null));
+                    return StatusCode(StatusCodes.Status404NotFound, ResponseFormatter.FormatResponse(StatusCodes.Status404NotFound, $"Cannot find wishlist with id {id}"));
                 }
                 return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully deleted wishlist with id {id}", result));
             }

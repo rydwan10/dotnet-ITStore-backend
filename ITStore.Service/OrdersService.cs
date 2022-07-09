@@ -10,31 +10,31 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace ITStore.Services
 {
-    public class OrdersService : IOrdersService
+    public class OrdersService : BaseService, IOrdersService 
     {
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
-        public OrdersService(IMapper mapper, AppDbContext context)
+        public OrdersService(IMapper mapper, AppDbContext context, IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _mapper = mapper;
             _context = context;
         }
-        public async Task<TransactionsViewDTO> CreateOrder(Guid userId, TransactionsCreateDTO data)
+        public async Task<TransactionsViewDTO> CreateOrder(TransactionsCreateDTO data)
         {
             var orderPayment = _mapper.Map<OrderPayments>(data.Orders.OrderPayments);
-            orderPayment.CreatedBy(userId);
+            orderPayment.CreatedBy(UserId);
             await _context.OrderPayments.AddAsync(orderPayment);
             await _context.SaveChangesAsync();
 
             var order = _mapper.Map<Orders>(data.Orders);
-            order.UsersId = userId.ToString();
+            order.UsersId = UserId;
             order.OrderPaymentsId = orderPayment.Id;
-            order.CreatedBy(userId);
+            order.CreatedBy(UserId);
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
 
@@ -42,14 +42,14 @@ namespace ITStore.Services
             foreach (var item in orderItems)
             {
                 item.OrdersId = order.Id;
-                item.CreatedBy(userId);
+                item.CreatedBy(UserId);
             }
             await _context.OrderItems.AddRangeAsync(orderItems);
             await _context.SaveChangesAsync();
 
             var shippingAddress = _mapper.Map<ShippingAddresses>(data.ShippingAddresses);
             shippingAddress.OrdersId = order.Id;
-            shippingAddress.CreatedBy(userId);
+            shippingAddress.CreatedBy(UserId);
             await _context.ShippingAddresses.AddAsync(shippingAddress);
 
             await _context.SaveChangesAsync();
@@ -82,14 +82,14 @@ namespace ITStore.Services
             };
         }
 
-        public async Task<List<TransactionsViewDTO>> GetAllOrders(Guid userId)
+        public async Task<List<TransactionsViewDTO>> GetAllOrders()
         {
             var transactionList = new List<TransactionsViewDTO>();
 
             var resultOrder = await _context.Orders
                                             .Include(x => x.OrderPayments)
                                             .Include(x => x.Users)
-                                            .Where(x => x.UsersId == userId.ToString())
+                                            .Where(x => x.UsersId == UserId)
                                             .ToListAsync();
 
             var mappedResultOrder = _mapper.Map<List<OrdersViewDTO>>(resultOrder);
@@ -126,7 +126,7 @@ namespace ITStore.Services
             return transactionList;
         }
 
-        public Task<TransactionsViewDTO> GetOrdersById(Guid userId, Guid id)
+        public Task<TransactionsViewDTO> GetOrdersById(Guid id)
         {
             throw new NotImplementedException();
         }

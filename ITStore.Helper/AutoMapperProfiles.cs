@@ -3,7 +3,6 @@ using System;
 using ITStore.DTOs.Categories;
 using ITStore.Domain;
 using ITStore.DTOs.Products;
-using System.Collections.Generic;
 using ITStore.DTOs.Discounts;
 using ITStore.DTOs.Inventories;
 using ITStore.DTOs.Wishlists;
@@ -116,7 +115,7 @@ namespace ITStore.Helpers
 
         private DiscountsViewDTO MapProductsDiscounts(Products products, ProductsViewDTO productsViewDTO)
         {
-            if (products.Categories != null)
+            if (products.Discounts != null)
             {
                 return new DiscountsViewDTO()
                 {

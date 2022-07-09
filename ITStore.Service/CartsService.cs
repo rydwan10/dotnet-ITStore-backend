@@ -7,33 +7,33 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace ITStore.Services
 {
-    public class CartsService : ICartsService
+    public class CartsService : BaseService, ICartsService
     {
-        public readonly AppDbContext _context;
-        public readonly IMapper _mapper;
+        private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public CartsService(AppDbContext context, IMapper mapper)
+        public CartsService(AppDbContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _context = context;
             _mapper = mapper;
         }
 
-        public async Task<CartsViewDTO> AddToCarts(CartsCreateDTO data, Guid userId)
+        public async Task<CartsViewDTO> AddToCarts(CartsCreateDTO data)
         {
             var newItem = _mapper.Map<Carts>(data);
 
-            newItem.UsersId = userId.ToString();
-            newItem.CreatedBy(userId);
+            newItem.UsersId = UserId;
+            newItem.CreatedBy(UserId);
 
             await _context.Carts.AddAsync(newItem);
             await _context.SaveChangesAsync();
 
-            var result = await _context.Carts.Where(x => x.UsersId == userId.ToString() && x.Id == newItem.Id)
+            var result = await _context.Carts.Where(x => x.UsersId == UserId && x.Id == newItem.Id)
                 .Include(x => x.Products).ThenInclude(x => x.Inventories)
                 .Include(x => x.Products).ThenInclude(x => x.Categories)
                 .Include(x => x.Products).ThenInclude(x => x.Discounts)
@@ -44,9 +44,9 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<List<CartsViewDTO>> GetCarts(Guid userId)
+        public async Task<List<CartsViewDTO>> GetCarts()
         {
-            var result = await _context.Carts.Where(x => x.UsersId == userId.ToString())
+            var result = await _context.Carts.Where(x => x.UsersId == UserId)
                 .Include(x => x.Products).ThenInclude(x => x.Inventories)
                 .Include(x => x.Products).ThenInclude(x => x.Categories)
                 .Include(x => x.Products).ThenInclude(x => x.Discounts)
@@ -57,9 +57,9 @@ namespace ITStore.Services
             return mappedResult;
         }
 
-        public async Task<CartsViewDTO> RemoveFromCarts(Guid id, Guid userId)
+        public async Task<CartsViewDTO> RemoveFromCarts(Guid id)
         {
-            var item = await _context.Carts.Where(x => x.UsersId == userId.ToString() && x.Id == id)
+            var item = await _context.Carts.Where(x => x.UsersId == UserId && x.Id == id)
                .Include(x => x.Products).ThenInclude(x => x.Inventories)
                .Include(x => x.Products).ThenInclude(x => x.Categories)
                .Include(x => x.Products).ThenInclude(x => x.Discounts)
@@ -67,7 +67,7 @@ namespace ITStore.Services
 
             if (item == null) return null;
 
-            item.DeletedBy(userId);
+            item.DeletedBy(UserId);
             await _context.SaveChangesAsync();
 
             var mappedResult = _mapper.Map<CartsViewDTO>(item);

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using ITStore.DTOs.Orders;
 
 namespace ITStore.API.Controllers
 {
@@ -64,17 +65,40 @@ namespace ITStore.API.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status500InternalServerError)]
-        public async Task<ResponseFormat> GetAll()
+        public async Task<ActionResult> GetAll()
         {
             try
             {
                 var result = await _ordersService.GetAllOrders();
-                return ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully get all orders", result);
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK, $"Successfully get all orders", result));
             }
             catch (Exception e)
             {
-                return ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Error when getting all orders", e);
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(StatusCodes.Status200OK, "Error when getting all orders", e));
             }
         }
+
+        [HttpPut]
+        [Route("update-list")]
+        [ProducesResponseType(typeof(ResponseFormat), StatusCodes.Status200OK)]
+        public async Task<ActionResult> UpdateList([FromBody] UpdateStatusOrderDTO data)
+        {
+            try
+            {
+                if (data == null) return BadRequest("Payload is required");
+
+                var result = await _ordersService.UpdateOrderList(data);
+                
+                return Ok(ResponseFormatter.FormatResponse(StatusCodes.Status200OK,
+                    $"Successfully updated {result} of ${data.OrderIds.Count} orders"));
+                
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ResponseFormatter.FormatResponse(StatusCodes.Status500InternalServerError,
+                    "Error when updating list of orders", e));
+            }
+        }
+        
     }
 }

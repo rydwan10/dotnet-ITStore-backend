@@ -13,5 +13,6 @@ namespace ITStore.Services.Interfaces
         Task<TransactionsViewDTO> CreateOrder(TransactionsCreateDTO data);
         Task<List<TransactionsViewDTO>> GetAllOrders();
         Task<TransactionsViewDTO> GetOrdersById(Guid id);
+        Task<int> UpdateOrderList(UpdateStatusOrderDTO data);
     }
 }

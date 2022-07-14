@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace ITStore.Services
 {
-    public class OrdersService : BaseService, IOrdersService 
+    public class OrdersService : BaseService, IOrdersService
     {
         private readonly IMapper _mapper;
         private readonly AppDbContext _context;
@@ -97,17 +97,18 @@ namespace ITStore.Services
             foreach (var order in mappedResultOrder)
             {
                 var resultOrderItems = await _context.OrderItems.Where(x => x.OrdersId == order.Id)
-                                                     .Include(y => y.Products)
-                                                     .ThenInclude(x => x.Inventories)
-                                                     .Include(y => y.Products)
-                                                     .ThenInclude(x => x.Discounts)
-                                                     .Include(y => y.Products)
-                                                     .ThenInclude(x => x.Categories)
-                                                     .ToListAsync();
+                    .Include(y => y.Products)
+                    .ThenInclude(x => x.Inventories)
+                    .Include(y => y.Products)
+                    .ThenInclude(x => x.Discounts)
+                    .Include(y => y.Products)
+                    .ThenInclude(x => x.Categories)
+                    .ToListAsync();
 
                 var mappedResultOrderItems = _mapper.Map<List<OrderItemsViewDTO>>(resultOrderItems);
 
-                var resultShippingAddress = await _context.ShippingAddresses.SingleOrDefaultAsync(x => x.OrdersId == order.Id);
+                var resultShippingAddress =
+                    await _context.ShippingAddresses.SingleOrDefaultAsync(x => x.OrdersId == order.Id);
                 var mappedResultShippingAddress = _mapper.Map<ShippingAddressesViewDTO>(resultShippingAddress);
 
                 var transaction = new TransactionsViewDTO
@@ -120,15 +121,30 @@ namespace ITStore.Services
                 transactionList.Add(transaction);
             }
 
-
-
-
             return transactionList;
         }
 
-        public Task<TransactionsViewDTO> GetOrdersById(Guid id)
+        public async Task<TransactionsViewDTO> GetOrdersById(Guid id)
         {
-            throw new NotImplementedException();
+            var selectedOrder = await _context.Orders.Where(x => x.Id == id).SingleOrDefaultAsync();
+
+            if (selectedOrder == null) return null;
+
+            return null;
         }
+
+        public async Task<int> UpdateOrderList(UpdateStatusOrderDTO data)
+        {
+            var listOrderByIds = await _context.Orders.Where(x => data.OrderIds.Contains(x.Id)).ToListAsync();
+
+            foreach (var order in listOrderByIds)
+            {
+                order.Status = data.OrderStatus;
+            }
+
+            await _context.SaveChangesAsync();
+            return listOrderByIds.Count;
+        }
+
     }
 }
